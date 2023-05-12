@@ -13,16 +13,18 @@ exports.signup = async (req, res, next) => {
             error.statusCode = 422;
             error.data = errors.array();
             throw error;
-
         }
 
         const { name, email, password, dob } = req.body;
+
+        console.log(name, email, password, dob);
+
         await User.findOne({ email: email })
             .then(user => {
                 if (user) {
                     const error = new Error("Email already Used. Please use a different email");
                     error.statusCode = 409;
-                    throw error; 
+                    throw error;
                 }
             })
             .catch(err => {
@@ -58,23 +60,20 @@ exports.signup = async (req, res, next) => {
     }
 };
 
-exports.login =async (req,res,next)=>{
+exports.login = async (req, res, next) => {
+    try {
+        const { email, password } = req.body;
 
-    try{
-        const {email,password}=req.body;
+        console.log(email, password);
 
-        const user= await User.find({email})
-        
-            if(!user)
-            {
-                const error= new Error("Cannot find a user with this email");
-                if(!error.statusCode)
-                {
-                    error.statusCode=404;
-                }
+        const user = await User.find({ email });
 
-                throw error;
+        console.log(user);
 
+        if (!user) {
+            const error = new Error("Cannot find a user with this email");
+            if (!error.statusCode) {
+                error.statusCode = 404;
             }
             const isEqual= bcrypt.compare(password,user.password);
             if(!isEqual)
@@ -98,6 +97,10 @@ exports.login =async (req,res,next)=>{
             );
             res.status(200).json({token:token,userId:user._id.toString()});
 
+            }
+            throw error;
+        
+        
     }
     catch (err) {
         console.log(err);

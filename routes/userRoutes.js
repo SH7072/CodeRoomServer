@@ -1,11 +1,11 @@
 const express = require("express");
-const User =require("../models/User");
+const User = require("../models/User");
 const { signup, login } = require('../controllers/userController');
 const { check, body } = require('express-validator');
 
 const router = express.Router();
 
-const isAuth=require('../middleware/isAuth');
+const isAuth = require('../middleware/isAuth');
 
 
 router.post('/signup', [
@@ -17,7 +17,7 @@ router.post('/signup', [
     body("email")
         .trim()
         .isEmail()
-        .withMessage("Please enter a valid phone number"),      
+        .withMessage("Please enter a valid phone number"),
     body("password")
         .trim()
         .isLength({ min: 6 })
