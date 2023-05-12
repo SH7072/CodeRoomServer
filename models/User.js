@@ -16,7 +16,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, "Please provide a password"],
         minlength: 6,
-        select: false,
+        // select: false,
     },
 
     dob:{
@@ -28,12 +28,12 @@ const userSchema = new mongoose.Schema({
     avatar:{
         public_id:{
             type: String,
-            required: true,
+            // required: true,
             
         },
         url:{
             type: String,
-            required: true,
+            // required: true,
         },
     },
 
