@@ -20,6 +20,7 @@ app.use(
     })
 );
 
+app.use(express.json());
 
 // adding Routes
 app.use("/user", user);
