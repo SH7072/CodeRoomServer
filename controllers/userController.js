@@ -6,23 +6,25 @@ const bcrypt = require('bcrypt');
 exports.signup = async (req, res, next) => {
 
     try {
-        const errors = validationResult(req);
-        // console.log(errors);
-        if (!errors.isEmpty()) {
-            const error = new Error("Validation failed");
-            error.statusCode = 422;
-            error.data = errors.array();
-            throw error;
-
-        }
+        // const errors = validationResult(req);
+        // // console.log(errors);
+        // if (!errors.isEmpty()) {
+        //     const error = new Error("Validation failed");
+        //     error.statusCode = 422;
+        //     error.data = errors.array();
+        //     throw error;
+        // }
 
         const { name, email, password, dob } = req.body;
+
+        console.log(name, email, password, dob);
+
         await User.findOne({ email: email })
             .then(user => {
                 if (user) {
                     const error = new Error("Email already Used. Please use a different email");
                     error.statusCode = 409;
-                    throw error; 
+                    throw error;
                 }
             })
             .catch(err => {
@@ -39,7 +41,7 @@ exports.signup = async (req, res, next) => {
         const user = await User.create({
             name,
             email,
-            hashedPassword,
+            password: hashedPassword,
             dob,
         });
         const result = await user.save();
@@ -58,37 +60,39 @@ exports.signup = async (req, res, next) => {
     }
 };
 
-exports.login =async (req,res,next)=>{
+exports.login = async (req, res, next) => {
+    try {
+        const { email, password } = req.body;
 
-    try{
-        const {email,password}=req.body;
+        console.log(email, password);
 
-        const user= await User.find({email})
-        
-            if(!user)
-            {
-                const error= new Error("Cannot find a user with this email");
-                if(!error.statusCode)
-                {
-                    error.statusCode=404;
-                }
+        const user = await User.find({ email });
 
-                throw error;
+        console.log(user);
+
+        if (!user) {
+            const error = new Error("Cannot find a user with this email");
+            if (!error.statusCode) {
+                error.statusCode = 404;
+            }
+
+            throw error;
+        }
+
+        //compare password using bcrypt
+        const isEqual = await bcrypt.compare(password, user[0].password);
+        if (!isEqual) {
+            const error = new Error("Wrong Password");
+            if (!error.statusCode) {
+                error.statusCode = 401;
 
             }
-            const isEqual= bcrypt.comparePassword(password);
-            if(!isEqual)
-            {
-                const error= new Error("Wrong Password");
-                if(!error.statusCode)
-                {
-                    error.statusCode=401;
-                }
-
-                throw error;
-            }            
-        
-
+            throw error;
+        }
+        res.status(201).json({
+            message: "User LoggedIn",
+            user: user,
+        });
     }
     catch (err) {
         console.log(err);
