@@ -3,8 +3,10 @@ const User =require("../models/User");
 const { signup, login } = require('../controllers/userController');
 const { check, body } = require('express-validator');
 
-
 const router = express.Router();
+
+const isAuth=require('../middleware/isAuth');
+
 
 router.post('/signup', [
     body("name")
@@ -15,24 +17,7 @@ router.post('/signup', [
     body("email")
         .trim()
         .isEmail()
-        .withMessage("Please enter a valid phone number")
-        .custom(async (value, { req }) => {
-            try {
-                const user = await User.findOne({ email: value });
-
-                if (user) {
-                    return Promise.reject("User already exists");
-                }
-
-                return Promise.resolve();
-            } catch (err) {
-                if (!err.statusCode) {
-                    err.statusCode = 500;
-                }
-
-                next(err);
-            }
-        }),
+        .withMessage("Please enter a valid phone number"),      
     body("password")
         .trim()
         .isLength({ min: 6 })

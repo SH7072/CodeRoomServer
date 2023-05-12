@@ -1,7 +1,7 @@
 const User = require('../models/User');
 const { validationResult } = require('express-validator')
 const bcrypt = require('bcrypt');
-
+const jwt =require('jsonwebtoken')
 
 exports.signup = async (req, res, next) => {
 
@@ -39,7 +39,7 @@ exports.signup = async (req, res, next) => {
         const user = await User.create({
             name,
             email,
-            hashedPassword,
+            password:hashedPassword,
             dob,
         });
         const result = await user.save();
@@ -76,7 +76,7 @@ exports.login =async (req,res,next)=>{
                 throw error;
 
             }
-            const isEqual= bcrypt.comparePassword(password);
+            const isEqual= bcrypt.compare(password,user.password);
             if(!isEqual)
             {
                 const error= new Error("Wrong Password");
@@ -87,7 +87,16 @@ exports.login =async (req,res,next)=>{
 
                 throw error;
             }            
-        
+            
+            const token=jwt.sign(
+                {
+                    email:user.email,
+                    userId:user._id.toString()
+            
+                },process.env.JWT_SECRET,
+                {expiresIn : '2h'}
+            );
+            res.status(200).json({token:token,userId:user._id.toString()});
 
     }
     catch (err) {
