@@ -1,7 +1,7 @@
 const User = require('../models/User');
 const { validationResult } = require('express-validator')
 const bcrypt = require('bcrypt');
-const jwt =require('jsonwebtoken')
+const jwt = require('jsonwebtoken')
 
 exports.signup = async (req, res, next) => {
 
@@ -41,11 +41,11 @@ exports.signup = async (req, res, next) => {
         const user = await User.create({
             name,
             email,
-            password:hashedPassword,
+            password: hashedPassword,
             dob,
         });
         const result = await user.save();
-        res.status(201).json({
+        res.status(200).json({
             message: "User created",
             userId: result._id,
         });
@@ -75,32 +75,31 @@ exports.login = async (req, res, next) => {
             if (!error.statusCode) {
                 error.statusCode = 404;
             }
-            const isEqual= bcrypt.compare(password,user.password);
-            if(!isEqual)
-            {
-                const error= new Error("Wrong Password");
-                if(!error.statusCode)
-                {
-                    error.statusCode=401;
-                }
-
-                throw error;
-            }            
-            
-            const token=jwt.sign(
-                {
-                    email:user.email,
-                    userId:user._id.toString()
-            
-                },process.env.JWT_SECRET,
-                {expiresIn : '2h'}
-            );
-            res.status(200).json({token:token,userId:user._id.toString()});
-
+        }
+        const isEqual = bcrypt.compare(password, user[0].password);
+        if (!isEqual) {
+            const error = new Error("Wrong Password");
+            if (!error.statusCode) {
+                error.statusCode = 401;
             }
+
             throw error;
-        
-        
+        }
+
+        const token = jwt.sign(
+            {
+                email: user[0].email,
+                userId: user[0]._id.toString()
+
+            }, process.env.JWT_SECRET,
+            { expiresIn: '2h' }
+        );
+
+        res.status(200).json({
+            message: 'user is loggedIn',
+            token: token,
+            userId: user[0]._id.toString()
+        });
     }
     catch (err) {
         console.log(err);
@@ -111,3 +110,29 @@ exports.login = async (req, res, next) => {
     }
 
 };
+
+
+exports.getUserInfo = async (req, res, next) => {
+    try {
+        const userId = req.params.userId;
+        console.log(userId);
+        const user = await User.findById(userId);
+        if (!user) {
+            const error = new Error("No user found");
+            error.statusCode = 404;
+            throw error;
+        }
+        res.status(200).json({
+            message: "User found",
+            user: user
+        });
+    }
+    catch (err) {
+        console.log(err);
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    }
+}
+

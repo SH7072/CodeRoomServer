@@ -17,7 +17,7 @@ require('./config/dbConnection');
 app.use(
     cors({
         origin: "*",
-        credentials: true,
+        credentials: false,
         methods: ["GET", "POST", "PUT", "DELETE"],
     })
 );
@@ -32,7 +32,7 @@ app.use((error, req, res, next) => {
     const status = error.statusCode || 500;
     const message = error.message;
     const data = error.data;
-    res.status(status).json(message, data);
+    res.status(status).json({ message, data });
 });
 
 app.get("/", (req, res) =>
