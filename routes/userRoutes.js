@@ -42,6 +42,7 @@ router.post('/login', [
 ], login);
 
 
+
 router.get('/user', isAuth, getUserInfo);
 
 module.exports = router;
