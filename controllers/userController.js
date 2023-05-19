@@ -1,7 +1,7 @@
 const User = require('../models/User');
 const { validationResult } = require('express-validator')
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken');
 
 exports.signup = async (req, res, next) => {
 
@@ -15,9 +15,9 @@ exports.signup = async (req, res, next) => {
             throw error;
         }
 
-        const { name, email, password, dob } = req.body;
+        const { name, email, password } = req.body;
 
-        console.log(name, email, password, dob);
+        console.log(name, email, password);
 
         await User.findOne({ email: email })
             .then(user => {
@@ -42,14 +42,12 @@ exports.signup = async (req, res, next) => {
             name,
             email,
             password: hashedPassword,
-            dob,
         });
         const result = await user.save();
         res.status(200).json({
             message: "User created",
-            userId: result._id,
+            // userId: result,
         });
-
     }
     catch (err) {
         console.log(err);
@@ -98,7 +96,7 @@ exports.login = async (req, res, next) => {
         res.status(200).json({
             message: 'user is loggedIn',
             token: token,
-            userId: user[0]._id.toString()
+            userId: user[0]
         });
     }
     catch (err) {
@@ -114,7 +112,7 @@ exports.login = async (req, res, next) => {
 
 exports.getUserInfo = async (req, res, next) => {
     try {
-        const userId = req.params.userId;
+        const userId = req.userId;
         console.log(userId);
         const user = await User.findById(userId);
         if (!user) {
@@ -122,6 +120,9 @@ exports.getUserInfo = async (req, res, next) => {
             error.statusCode = 404;
             throw error;
         }
+
+        console.log('Sending UserInfo', user);
+
         res.status(200).json({
             message: "User found",
             user: user

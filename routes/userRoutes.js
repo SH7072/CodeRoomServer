@@ -24,11 +24,6 @@ router.post('/signup', [
         .withMessage(
             "Password must contain at least 6 characters "
         ),
-    body("dob")
-        .trim()
-        .not()
-        .isEmpty()
-        .withMessage("Enter a non-empty DOB"),
 
 ], signup);
 
@@ -41,7 +36,6 @@ router.post('/login', [
     body("password").trim().not().isEmpty().withMessage("Enter a password"),
 ], login);
 
-
-router.get('/user', isAuth, getUserInfo);
+router.get('/getUserInfo', isAuth, getUserInfo);
 
 module.exports = router;
