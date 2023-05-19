@@ -2,9 +2,8 @@ const dotenv = require('dotenv');
 const express = require('express');
 const app = express();
 const user = require('./routes/userRoutes');
+const classwork = require('./routes/classworkRoutes');
 const cors = require("cors");
-// const bodyParser = require("body-parser");
-
 
 dotenv.config({
     path: "./config/config.env",
@@ -26,6 +25,7 @@ app.use(express.json());
 
 // adding Routes
 app.use("/user", user);
+app.use("/classwork", classwork);
 
 app.use((error, req, res, next) => {
     console.log(error);

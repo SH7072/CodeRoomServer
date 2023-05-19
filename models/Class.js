@@ -78,7 +78,7 @@ const classSchema = new mongoose.Schema({
         required: true,
     },
 
-},{timestamp});
+},{timestamp:true});
 
 
 module.exports = mongoose.model("Class", classSchema);

@@ -1,11 +1,11 @@
 const express = require("express");
-const User = require("../models/User");
+
 const { signup, login, getUserInfo } = require('../controllers/userController');
 const { check, body } = require('express-validator');
 
 const router = express.Router();
 
-const isAuth = require('../middleware/isAuth');
+const { isAuth }= require('../middleware/isAuth');
 
 
 router.post('/signup', [

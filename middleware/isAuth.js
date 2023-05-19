@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
+const Class=require('../models/Class');
 
-module.exports = (req, res, next) => {
+exports.isAuth = (req, res, next) => {
     const authHeader = req.get('Authorization');
     if (!authHeader) {
         const error = new Error("Not Authenticated");
@@ -23,6 +24,13 @@ module.exports = (req, res, next) => {
     }
 
     req.userId = decodedToken.userId;
-    next();
+    next();     
 
 }
+
+exports.isTeacherOrOwner = async (req,res,next)=>{
+    const userId=req.userId;
+    const classId=req.body.classId;
+    const user=await Class.findOne({_id:classId,$or: [{'classTeachers.teacherId':userId},{'classOwner':userId}]})
+    console.log(user);
+};
