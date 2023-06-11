@@ -64,7 +64,7 @@ exports.login = async (req, res, next) => {
 
         console.log(email, password);
 
-        const user = await User.find({ email });
+        const user = await User.find({ email }).populate('classesAsTeacher.classId');
 
         console.log(user);
 
@@ -90,7 +90,7 @@ exports.login = async (req, res, next) => {
                 userId: user[0]._id.toString()
 
             }, process.env.JWT_SECRET,
-            { expiresIn: '2h' }
+            { expiresIn: '8h' }
         );
 
         res.status(200).json({
@@ -113,15 +113,29 @@ exports.login = async (req, res, next) => {
 exports.getUserInfo = async (req, res, next) => {
     try {
         const userId = req.userId;
-        console.log(userId);
-        const user = await User.findById(userId);
+        // console.log(userId);
+        const user = await User.findById(userId)
+            .populate('classesAsTeacher.classId')
+            .populate({
+                path: 'classesAsTeacher.classId',
+                populate: {
+                    path: 'classOwner'
+                }
+            })
+            .populate('classesAsStudent.classId')
+            .populate({
+                path: 'classesAsStudent.classId',
+                populate: {
+                    path: 'classOwner'
+                }
+            });
         if (!user) {
             const error = new Error("No user found");
             error.statusCode = 404;
             throw error;
         }
 
-        console.log('Sending UserInfo', user);
+        // console.log('Sending UserInfo', user);
 
         res.status(200).json({
             message: "User found",
