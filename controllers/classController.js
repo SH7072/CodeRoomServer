@@ -58,7 +58,7 @@ exports.createClass = async (req, res) => {
 
         const { className, section, subject } = req.body;
         const userId = req.userId;
-        console.log(className, section, subject, userId);
+        // console.log(className, section, subject, userId);
         const class_ = await Class.create({
             className: className,
             section: section,
@@ -79,7 +79,7 @@ exports.createClass = async (req, res) => {
 
         // const result = await Class.save();
 
-        console.log(class_);
+        // console.log(class_);
         res.status(200).json({
             message: "Class created",
             class: class_,
