@@ -1,9 +1,11 @@
 const dotenv = require('dotenv');
 const express = require('express');
 const app = express();
+
+// Importing routes
 const user = require('./routes/userRoutes');
+const classwork = require('./routes/classworkRoutes');
 const class_ = require('./routes/classRoutes');
-// const bodyParser = require("body-parser");
 
 
 const cors = require("cors");
@@ -27,6 +29,7 @@ app.use(express.json());
 
 // adding Routes
 app.use("/user", user);
+app.use("/classwork", classwork);
 app.use("/class", class_);
 
 
