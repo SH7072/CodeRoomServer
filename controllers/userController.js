@@ -64,15 +64,16 @@ exports.login = async (req, res, next) => {
 
         console.log(email, password);
 
-        const user = await User.find({ email }).populate('classesAsTeacher.classId');
+        const user = await User.find({ email });
 
         console.log(user);
 
-        if (!user) {
+        if (!user[0]) {
             const error = new Error("Cannot find a user with this email");
             if (!error.statusCode) {
                 error.statusCode = 404;
             }
+            throw error;
         }
         const isEqual = bcrypt.compare(password, user[0].password);
         if (!isEqual) {
@@ -80,7 +81,6 @@ exports.login = async (req, res, next) => {
             if (!error.statusCode) {
                 error.statusCode = 401;
             }
-
             throw error;
         }
 
