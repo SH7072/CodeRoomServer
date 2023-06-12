@@ -10,6 +10,7 @@ exports.joinClass = async (req, res) => {
         const userId = req.userId;
         console.log(classCode, userId);
 
+        //check if class exists
         const class_ = await Class.findOne({ classCode: classCode });
 
         if (!class_) {
@@ -17,6 +18,26 @@ exports.joinClass = async (req, res) => {
             error.statusCode = 404;
             throw error;
         }
+
+        //check if user is not a teacher of the class
+
+        class_.classTeachers.forEach(teacher => {
+            if (teacher.teacherId.toString() === userId.toString()) {
+                const error = new Error("You are already a teacher of this class");
+                error.statusCode = 403;
+                throw error;
+            }
+        });
+
+        //check if user is not a student of the class
+        class_.classStudents.forEach(student => {
+            if (student.studentId.toString() === userId.toString()) {
+                const error = new Error("You are already a student of this class");
+                error.statusCode = 403;
+                throw error;
+            }
+        });
+
 
         const response = await Class.findOneAndUpdate({ classCode: classCode }, {
             $push: {
@@ -148,4 +169,100 @@ exports.getAllClassRooms = async (req, res) => {
         }
         next(err);
     }
-}   
+}
+
+exports.editClass = async (req, res) => {
+    try {
+        const classId = req.params.id;
+        const { className, section, subject } = req.body;
+        const userId = req.userId;
+
+        //check if user is teacher of class
+        const class_ = await Class.findById(classId);
+        if (!class_) {
+            const error = new Error("Class not found");
+            error.statusCode = 404;
+            throw error;
+        }
+
+        if (class_.classTeachers.filter(teacher => teacher.teacherId.toString() === userId.toString()).length === 0) {
+            const error = new Error("User not authorized");
+            error.statusCode = 401;
+            throw error;
+        }
+
+        //update class
+
+        const updatedClass = await Class.findByIdAndUpdate(classId, {
+            className: className,
+            section: section,
+            subject: subject
+        }, {
+            new: true
+        });
+
+        res.status(200).json({
+            message: "Class updated",
+            class: updatedClass
+        });
+    }
+    catch (err) {
+        console.log(err);
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    }
+}
+
+exports.unenrollFromClass = async (req, res) => {
+    try {
+        const classId = req.params.id;
+        const userId = req.userId;
+
+        //check if user is student of class
+        const class_ = await Class.findById(classId);
+        if (!class_) {
+            const error = new Error("Class not found");
+            error.statusCode = 404;
+            throw error;
+        }
+
+        if (class_.classStudents.filter(student => student.studentId.toString() === userId.toString()).length === 0) {
+            const error = new Error("User not authorized");
+            error.statusCode = 401;
+            throw error;
+        }
+
+        //update class
+
+        const updatedClass = await Class.findByIdAndUpdate(classId, {
+            $pull: {
+                classStudents: { studentId: userId }
+            },
+        }, {
+            new: true
+        });
+
+        // update user
+
+        const updatedUser = await User.findByIdAndUpdate(userId, {
+            $pull: {
+                classesAsStudent: { classId: classId }
+            },
+        }, {
+            new: true
+        });
+
+        res.status(200).json({
+            message: "Unenrolled from class",
+        });
+    }
+    catch (err) {
+        console.log(err);
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    }
+}

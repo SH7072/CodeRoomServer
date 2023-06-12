@@ -1,11 +1,11 @@
 const express = require("express");
 
-const { signup, login, getUserInfo } = require('../controllers/userController');
+const { signup, login, getUserInfo, archiveClass } = require('../controllers/userController');
 const { check, body } = require('express-validator');
 
 const router = express.Router();
 
-const { isAuth }= require('../middleware/isAuth');
+const { isAuth } = require('../middleware/isAuth');
 
 
 router.post('/signup', [
@@ -37,5 +37,6 @@ router.post('/login', [
 ], login);
 
 router.get('/getUserInfo', isAuth, getUserInfo);
+router.post('/archiveClass/:id', isAuth, archiveClass);
 
 module.exports = router;

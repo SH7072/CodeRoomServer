@@ -38,6 +38,10 @@ const userSchema = new mongoose.Schema({
                     ref: "Class",
                     // required: true,
                 },
+                isArchived: {
+                    type: Boolean,
+                    default: false,
+                },
                 date: {
                     type: Date,
                     default: Date.now,
@@ -52,13 +56,31 @@ const userSchema = new mongoose.Schema({
                     ref: "Class",
                     // required: true,
                 },
+                isArchived: {
+                    type: Boolean,
+                    default: false,
+                },
                 date: {
                     type: Date,
                     default: Date.now,
                 },
+
             }
         ],
-
+    // archivedClasses:
+    //     [
+    //         {
+    //             classId: {
+    //                 type: mongoose.Schema.ObjectId,
+    //                 ref: "Class",
+    //                 // required: true,
+    //             },
+    //             date: {
+    //                 type: Date,
+    //                 default: Date.now,
+    //             },
+    //         }
+    //     ],
     resetPasswordToken: String,
     resetPasswordExpire: Date,
 
