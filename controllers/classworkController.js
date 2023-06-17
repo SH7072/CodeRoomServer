@@ -1,4 +1,5 @@
-const ClassWork = require("../models/ClassWork");
+const ClassWork = require("../models/Classwork");
+const Comment = require("../models/Comments");
 
 exports.createClassWork = async (req, res, next) => {
     try {
@@ -78,7 +79,7 @@ exports.updateClasswork = async (req, res, next) => {
     }
 };
 
-exports.getClasswork = async (req, res, next) => {
+exports.getClassworkInfo = async (req, res, next) => {
     try {
         const classworkId = req.body.classworkId;
         const classwork = await Classwork.findById(classworkId);
@@ -97,24 +98,24 @@ exports.getClasswork = async (req, res, next) => {
 };
 
 
-//????????????
-// exports.getAllClasswork=async(req,res,next)=>{
-//     try{
-//         const classId=req.body.classId;
-//         const classwork=await Classwork.find({classId});
-//         res.status(200).json({
-//             message:"Classwork fetched",
-//             classwork
-//         });
-//     }
-//     catch(err){
-//         console.log(err);
-//         if(!err.statusCode){
-//             err.statusCode=500;
-//         }
-//         next(err);
-//     }
-// };
+
+exports.getAllClasswork=async(req,res,next)=>{
+    try{
+        const classId=req.body.classId;
+        const classwork=await Classwork.find({classId});
+        res.status(200).json({
+            message:"Classwork fetched",
+            classwork
+        });
+    }
+    catch(err){
+        console.log(err);
+        if(!err.statusCode){
+            err.statusCode=500;
+        }
+        next(err);
+    }
+};
 
 exports.submitClasswork = async (req, res, next) => {
     try {
@@ -168,6 +169,36 @@ exports.getSubmissionsByUser = async (req, res, next) => {
         });
     }
     catch (err) {
+        console.log(err);
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    }
+}
+
+exports.classworkPostComment = async (req, res) => {
+    try{
+        const {classworkId,userId,description}=req.body;
+        const classwork = await Classwork.findById(classworkId);
+        
+        const comments= new Comments({
+            comment:description,
+            commentBy:userId,
+            
+        });
+        const result =await comments.save();
+        classwork.comments.push(result._id);    
+
+        const result1 = await classwork.save();
+
+        res.status(201).json({
+            message:"Comment posted",
+            classworkId:result1._id,
+        });
+
+    }
+    catch(err){
         console.log(err);
         if (!err.statusCode) {
             err.statusCode = 500;
