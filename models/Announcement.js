@@ -1,4 +1,4 @@
-const  mongoose = require("mongoose");
+const mongoose = require("mongoose");
 
 const announcementSchema = new mongoose.Schema({
 
@@ -7,57 +7,53 @@ const announcementSchema = new mongoose.Schema({
         ref: "Class",
         required: true,
     },
-    
     announcement: {
         type: String,
-        required: true,
+        required: false,
     },
-    
     announcementBy: {
         type: mongoose.Schema.ObjectId,
         ref: "User",
         required: true,
     },
-
     announcementDate: {
         type: Date,
         default: Date.now,
     },
-
-    commnets:[
+    comments: [
         {
-            commentId:{
-                type:mongoose.Schema.ObjectId,
-                ref:"Comment",
-                required:true,
+            commentId: {
+                type: mongoose.Schema.ObjectId,
+                ref: "Comment",
+                required: true,
             },
 
         }
     ],
-
-    assignedTo:[
+    assignedTo: [
         {
-            studentId:{
-                type:mongoose.Schema.ObjectId,
-                ref:"User",
-                required:true,
+            studentId: {
+                type: mongoose.Schema.ObjectId,
+                ref: "User",
+                required: true,
             },
 
         }
     ],
-    
-    attachments:[{
-        public_id:{
-            type:String,
-            required:true,
+    attachments: [{
+        public_id: {
+            type: String,
+            required: true,
         },
-        url:{
-            type:String,
-            required:true,
+        url: {
+            type: String,
+            required: true,
         },
-
+        type: {
+            type: String,
+            required: true,
+        },
     }],
-
 }, { timestamp: true });
 
 module.exports = mongoose.model("Announcement", announcementSchema);

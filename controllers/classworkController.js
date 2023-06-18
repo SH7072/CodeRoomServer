@@ -10,6 +10,15 @@ exports.createClassWork = async (req, res, next) => {
         // console.log(req.body.file);
         // console.log(req.file);
 
+        const classWorkFile = [];
+        if (req.file) {
+            classWorkFile.push({
+                url: req.file.location,
+                public_id: req.file.key,
+                type: req.file.mimetype,
+            });
+        }
+
         const classWork = new ClassWork({
             classId,
             type,
@@ -18,10 +27,7 @@ exports.createClassWork = async (req, res, next) => {
             topic,
             dueDate,
             classWorkMarks: points,
-            classWorkFile: [{
-                public_id: req.file.key,
-                url: req.file.location,
-            }],
+            classWorkFile: classWorkFile,
         });
 
         const result = await classWork.save();

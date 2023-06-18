@@ -2,6 +2,7 @@ const User = require('../models/User');
 const { validationResult } = require('express-validator')
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const Class = require('../models/Class');
 
 exports.signup = async (req, res, next) => {
 
@@ -187,3 +188,42 @@ exports.archiveClass = async (req, res, next) => {
         next(err);
     }
 }
+
+
+exports.getPeople = async (req, res, next) => {
+    try {
+        const userId = req.userId;
+        const classId = req.params.classId;
+        console.log(userId, classId);
+
+        //get all teachers and students of the class
+
+        const class_ = await Class.findById(classId).populate('classStudents.studentId').populate('classTeachers.teacherId').populate('classOwner');
+
+        if (!class_) {
+            const error = new Error("No class found");
+            error.statusCode = 404;
+            throw error;
+        }
+
+        const teachers = class_.classTeachers.map(t => t.teacherId);
+        const students = class_.classStudents.map(s => s.studentId);
+
+        console.log(teachers, students);
+
+        res.status(200).json({
+            message: "People Fetched",
+            teachers: teachers,
+            students: students
+        });
+    }
+    catch (err) {
+        console.log(err);
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    }
+}
+
+

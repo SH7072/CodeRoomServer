@@ -40,6 +40,10 @@ const classWorkSchema = mongoose.Schema({
                 required: true,
 
             },
+            type: {
+                type: String,
+                required: true,
+            },
         }
     ],
     classWorkMarks: {
@@ -48,10 +52,10 @@ const classWorkSchema = mongoose.Schema({
     },
     classWorkComments: [
         {
-            commentId:{
-                type:mongoose.Schema.ObjectId,
-                ref:"Comment",
-                required:true,
+            commentId: {
+                type: mongoose.Schema.ObjectId,
+                ref: "Comment",
+                required: true,
             },
         }
     ],

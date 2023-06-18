@@ -1,6 +1,6 @@
 const express = require("express");
 
-const { signup, login, getUserInfo, archiveClass } = require('../controllers/userController');
+const { signup, login, getUserInfo, archiveClass, getPeople } = require('../controllers/userController');
 const { check, body } = require('express-validator');
 
 const router = express.Router();
@@ -38,5 +38,6 @@ router.post('/login', [
 
 router.get('/getUserInfo', isAuth, getUserInfo);
 router.post('/archiveClass/:id', isAuth, archiveClass);
+router.get('/getPeople/:classId', isAuth, getPeople);
 
 module.exports = router;
