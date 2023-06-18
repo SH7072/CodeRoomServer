@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const multer = require('multer');
-const { createClassWork, getClassWork, updateClasswork, deleteClasswork, getSubmissionsByUser, } = require('../controllers/classworkController');
+const { createClassWork, getClassWork, updateClasswork, deleteClasswork, getSubmissionsByUser, getAllClasswork, classworkPostComment, } = require('../controllers/classworkController');
 // const { check, body } = require('express-validator');
 
 const { isAuth, isTeacherOrOwner } = require('../middleware/isAuth');
@@ -18,5 +18,13 @@ router.delete('/deleteclasswork', isAuth, isTeacherOrOwner, deleteClasswork);
 router.put('/updateclasswork', isAuth, isTeacherOrOwner, updateClasswork);
 
 router.get('/getclassWork/:classId', isAuth, getClassWork);
+// get all classworks
+router.get('/getallclasswork', isAuth, getAllClasswork);
+
+//get classwork details
+// router.get('/getclassworkinfo', isAuth, getClassworkInfo);
+
+//post comments to a classwork
+router.post('/postcommnet', isAuth, classworkPostComment);
 
 module.exports = router;

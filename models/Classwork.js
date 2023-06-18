@@ -48,18 +48,10 @@ const classWorkSchema = mongoose.Schema({
     },
     classWorkComments: [
         {
-            comment: {
-                type: String,
-                required: true,
-            },
-            commentBy: {
-                type: mongoose.Schema.ObjectId,
-                ref: "User",
-                required: true,
-            },
-            commentDate: {
-                type: Date,
-                default: Date.now,
+            commentId:{
+                type:mongoose.Schema.ObjectId,
+                ref:"Comment",
+                required:true,
             },
         }
     ],

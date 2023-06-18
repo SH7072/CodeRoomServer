@@ -14,6 +14,7 @@ require('./config/dbConnection');
 const user = require('./routes/userRoutes');
 const classWork = require('./routes/classworkRoutes');
 const class_ = require('./routes/classRoutes');
+const announcement=require('./routes/announcementRoutes');
 
 
 const { uploadToS3, downloadFile } = require('./utils/s3');
@@ -45,6 +46,7 @@ app.get("/file/:key", (req, res, next) => {
 app.use("/user", user);
 app.use("/classWork", classWork);
 app.use("/class", class_);
+app.use("/announcement", announcement);
 
 
 
