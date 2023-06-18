@@ -118,6 +118,22 @@ exports.createClass = async (req, res) => {
 
 }
 
+const getRole = (class_, userId) => {
+
+    // console.log(class_, userId);
+    let flag = 0;
+    class_.classTeachers.forEach(teacher => {
+        if (teacher.teacherId._id.toString() === userId.toString()) {
+            flag = 1;
+        }
+    });
+
+    if (flag == 1) {
+        return "teacher";
+    }
+    return "student";
+}
+
 exports.getClassInfo = async (req, res) => {
     try {
         const classId = req.params.id;
@@ -126,11 +142,22 @@ exports.getClassInfo = async (req, res) => {
             .populate('classStudents.studentId')
             .populate('classOwner');
 
-        console.log(class_, "getClassInfo");
+
+        if (!class_) {
+            const error = new Error("Class not found");
+            error.statusCode = 404;
+            throw error;
+        }
+
+        const userId = req.userId;
+
+        let role = getRole(class_, userId);
+        // console.log("role:", role);
 
         res.status(200).json({
             message: "Class Info",
-            class: class_
+            class: class_,
+            role: role
         });
     }
     catch (err) {

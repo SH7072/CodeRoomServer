@@ -5,9 +5,9 @@ exports.createClassWork = async (req, res, next) => {
         const { title, type, instructions, dueDate, points, topic, file, classId, assignedTo } = req.body;
         // console.log(req.body);
 
-        console.log(req.body);
-        console.log(req.body.file);
-        console.log(req.file);
+        // console.log(req.body);
+        // console.log(req.body.file);
+        // console.log(req.file);
 
         const classWork = new ClassWork({
             classId,
@@ -17,16 +17,20 @@ exports.createClassWork = async (req, res, next) => {
             topic,
             dueDate,
             classWorkMarks: points,
-
+            classWorkFile: [{
+                public_id: req.file.key,
+                url: req.file.location,
+            }],
         });
 
+        const result = await classWork.save();
 
-        // const result = await classWork.save();
+        // console.log(result);
 
-        // res.status(201).json({
-        //     message: "Classwork created",
-        //     classWorkId: result._id,
-        // });
+        res.status(201).json({
+            message: "Classwork created",
+            classWork: result,
+        });
 
     }
     catch (err) {
@@ -78,13 +82,18 @@ exports.updateClasswork = async (req, res, next) => {
     }
 };
 
-exports.getClasswork = async (req, res, next) => {
+exports.getClassWork = async (req, res, next) => {
     try {
-        const classworkId = req.body.classworkId;
-        const classwork = await Classwork.findById(classworkId);
+        const { classId } = req.params;
+
+        // console.log(classId);
+        const classWork = await ClassWork.find({ classId: classId });
+
+        // console.log("Result: ", classWork);
+
         res.status(200).json({
             message: "Classwork fetched",
-            classwork
+            classWork: classWork
         });
     }
     catch (err) {

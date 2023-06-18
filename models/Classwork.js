@@ -16,7 +16,7 @@ const classWorkSchema = mongoose.Schema({
         type: String,
         required: true,
     },
-    instruction: {
+    instructions: {
         type: String,
         required: false,
     },
@@ -28,7 +28,6 @@ const classWorkSchema = mongoose.Schema({
     dueDate: {
         type: Date,
         required: false,
-        default: "No Due Date"
     },
     classWorkFile: [
         {
