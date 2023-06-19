@@ -7,12 +7,14 @@ exports.createAnnouncement = async (req, res) => {
         const userId = req.userId;
 
         const attachments = [];
-        if (req.file) {
-            attachments.push({
-                url: req.file.location,
-                public_id: req.file.key,
-                type: req.file.mimetype,
-            });
+        if (req.files && req.files.length > 0) {
+            for (let i = 0; i < req.files.length; i++) {
+                attachments.push({
+                    url: req.files[i].location,
+                    public_id: req.files[i].key,
+                    type: req.files[i].mimetype,
+                });
+            }
         }
 
         const announcement = new Announcement({
@@ -47,11 +49,10 @@ exports.getAnnouncements = async (req, res) => {
         const classId = req.params.classId;
         // const userId=req.params.userId;
 
-        const announcement = await Announcement.find({ classId }).sort({ createdAt: -1 }).populate("announcementBy", "name");
+        const announcement = await Announcement.find({ classId }).sort({ createdAt: -1 }).populate("announcementBy", "name").sort({ announcementDate: -1 });
         res.status(200).json({
             message: "Announcement fetched",
             announcement: announcement
-
         });
     }
     catch (err) {

@@ -3,36 +3,53 @@ const Comment = require("../models/Comments");
 
 exports.createClassWork = async (req, res, next) => {
     try {
-        const { title, type, instructions, dueDate, points, topic, file, classId, assignedTo } = req.body;
+        const { title, type, instructions, dueDate, points, topic, files, classId, assignedTo } = req.body;
         // console.log(req.body);
 
-        // console.log(req.body);
-        // console.log(req.body.file);
-        // console.log(req.file);
+        console.log(req.body);
+        // console.log(req.body.files);
+        console.log(req.files);
 
         const classWorkFile = [];
-        if (req.file) {
-            classWorkFile.push({
-                url: req.file.location,
-                public_id: req.file.key,
-                type: req.file.mimetype,
+        if (req.files && req.files.length > 0) {
+            for (let i = 0; i < req.files.length; i++) {
+                classWorkFile.push({
+                    url: req.files[i].location,
+                    public_id: req.files[i].key,
+                    type: req.files[i].mimetype,
+                });
+            }
+        }
+
+
+        let classWork;
+        if (dueDate === 'null') {
+            classWork = new ClassWork({
+                classId,
+                type,
+                title,
+                instructions,
+                topic,
+                classWorkMarks: points,
+                classWorkFile: classWorkFile,
+            });
+        }
+        else {
+            classWork = new ClassWork({
+                classId,
+                type,
+                title,
+                instructions,
+                topic,
+                dueDate,
+                classWorkMarks: points,
+                classWorkFile: classWorkFile,
             });
         }
 
-        const classWork = new ClassWork({
-            classId,
-            type,
-            title,
-            instructions,
-            topic,
-            dueDate,
-            classWorkMarks: points,
-            classWorkFile: classWorkFile,
-        });
-
         const result = await classWork.save();
 
-        // console.log(result);
+        console.log(result);
 
         res.status(201).json({
             message: "Classwork created",

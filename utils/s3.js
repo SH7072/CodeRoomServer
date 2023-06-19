@@ -49,7 +49,7 @@ exports.uploadToS3 = multer({
     limits: {
         fileSize: 1024 * 1024 * 5
     }
-}).single('file');
+}).array('files');
 
 
 
