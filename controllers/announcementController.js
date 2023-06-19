@@ -1,9 +1,9 @@
 const Announcement = require("../models/Announcement");
 const Class = require("../models/Class");
-const ClassWork = require("../models/Classwork");
+const ClassWork = require("../models/ClassWork");
 const Comment = require("../models/Comments");
 
-exports.createAnnouncement = async (req, res) => {
+exports.createAnnouncement = async (req, res, next) => {
     try {
         const { description, classId } = req.body;
         const userId = req.userId;
@@ -43,7 +43,7 @@ exports.createAnnouncement = async (req, res) => {
     }
 
 }
-exports.getAnnouncements = async (req, res) => {
+exports.getAnnouncements = async (req, res, next) => {
 
     try {
         const classId = req.params.classId;
@@ -65,7 +65,7 @@ exports.getAnnouncements = async (req, res) => {
     }
 
 }
-exports.editAnnouncement = async (req, res) => {
+exports.editAnnouncement = async (req, res, next) => {
     try {
         const { classId, announcementId } = req.params;
         const { description } = req.body;
@@ -108,7 +108,7 @@ exports.editAnnouncement = async (req, res) => {
     }
 }
 
-exports.deleteAnnouncement = async (req, res) => {
+exports.deleteAnnouncement = async (req, res, next) => {
     try {
         const { classId, announcementId } = req.params;
         const userId = req.userId;
@@ -140,7 +140,7 @@ exports.deleteAnnouncement = async (req, res) => {
     }
 }
 
-exports.getAnnouncementComments = async (req, res) => {
+exports.getAnnouncementComments = async (req, res, next) => {
     try {
         const announcementId = req.params.announcementId;
         const announcement = await Announcement.findById(announcementId);
@@ -158,7 +158,7 @@ exports.getAnnouncementComments = async (req, res) => {
     }
 }
 
-exports.announcementPostComments = async (req, res) => {
+exports.announcementPostComments = async (req, res, next) => {
     try {
         const announcementId = req.params.announcementId;
         const { userId, description } = req.body;

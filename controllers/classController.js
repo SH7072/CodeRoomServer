@@ -1,10 +1,10 @@
 const Class = require('../models/Class');
 const User = require("../models/User");
 const { nanoid } = require('nanoid');
-const mongoose = require('mongoose');
 
 
-exports.joinClass = async (req, res) => {
+
+exports.joinClass = async (req, res,next) => {
     try {
         const classCode = req.body.classCode;
         const userId = req.userId;
@@ -74,7 +74,7 @@ exports.joinClass = async (req, res) => {
 }
 
 
-exports.createClass = async (req, res) => {
+exports.createClass = async (req, res,next) => {
     try {
 
         const { className, section, subject } = req.body;
@@ -134,7 +134,7 @@ const getRole = (class_, userId) => {
     return "student";
 }
 
-exports.getClassInfo = async (req, res) => {
+exports.getClassInfo = async (req, res,next) => {
     try {
         const classId = req.params.id;
         const class_ = await Class.findById(classId)
@@ -170,7 +170,7 @@ exports.getClassInfo = async (req, res) => {
 
 }
 
-exports.getAllClassRooms = async (req, res) => {
+exports.getAllClassRooms = async (req, res,next) => {
     try {
         const userId = req.userId;
         const user = await User.findById(userId).populate('classesAsTeacher.classId').populate('classesAsStudent.classId');
@@ -198,7 +198,7 @@ exports.getAllClassRooms = async (req, res) => {
     }
 }
 
-exports.editClass = async (req, res) => {
+exports.editClass = async (req, res,next) => {
     try {
         const classId = req.params.id;
         const { className, section, subject } = req.body;
@@ -242,7 +242,7 @@ exports.editClass = async (req, res) => {
     }
 }
 
-exports.unenrollFromClass = async (req, res) => {
+exports.unenrollFromClass = async (req, res,next) => {
     try {
         const classId = req.params.id;
         const userId = req.userId;
