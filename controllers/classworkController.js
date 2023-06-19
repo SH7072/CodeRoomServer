@@ -1,4 +1,4 @@
-const ClassWork = require("../models/Classwork");
+const ClassWork = require("../models/ClassWork");
 const Comment = require("../models/Comments");
 
 exports.createClassWork = async (req, res, next) => {
@@ -66,13 +66,14 @@ exports.createClassWork = async (req, res, next) => {
     }
 };
 
-exports.deleteClasswork = async (req, res, next) => {
+exports.deleteClassWork = async (req, res, next) => {
     try {
-        const classworkId = req.body.classworkId;
-        const classwork = await Classwork.findByIdAndRemove(classworkId);
+        const { classworkId } = req.params;
+
+        const classWork = await ClassWork.findByIdAndRemove(classworkId);
         res.status(200).json({
             message: "Classwork deleted",
-            classwork
+            classWork
         });
     }
     catch (err) {
@@ -84,17 +85,36 @@ exports.deleteClasswork = async (req, res, next) => {
     }
 };
 
-exports.updateClasswork = async (req, res, next) => {
+exports.updateClassWork = async (req, res, next) => {
     try {
-        const { classworkId, title, description, deadline } = req.body;
-        const classwork = await Classwork.findById(classworkId);
+        const classworkId = req.params.id;
+        const { title, description, deadline } = req.body;
+        const attachments = [];
+
+        const classwork = await ClassWork.findById(classworkId);
+
+        if (req.file) {
+            attachments.push({
+                url: req.file.location,
+                public_id: req.file.key,
+                type: req.file.mimetype
+            });
+        }
+        if (!classwork) {
+            const error = new Error("No classwork found");
+            error.statusCode = 404;
+            throw error;
+        }
+
         classwork.title = title;
         classwork.description = description;
         classwork.deadline = deadline;
+        classwork.classWorkFile = attachments;
+
         const result = await classwork.save();
         res.status(200).json({
             message: "Classwork updated",
-            classworkId: result._id,
+            classworkId: result,
         });
     }
     catch (err) {
@@ -108,13 +128,10 @@ exports.updateClasswork = async (req, res, next) => {
 
 exports.getClassWork = async (req, res, next) => {
     try {
-        const { classId } = req.params;
 
-        // console.log(classId);
+        const { classId } = req.params;
         const classWork = await ClassWork.find({ classId: classId });
 
-        // console.log("Result: ", classWork);
-
         res.status(200).json({
             message: "Classwork fetched",
             classWork: classWork
@@ -129,76 +146,16 @@ exports.getClassWork = async (req, res, next) => {
     }
 };
 
-
-
-exports.getAllClasswork = async (req, res, next) => {
+exports.getClassWorkInfo = async (req, res, next) => {
     try {
-        const classId = req.body.classId;
-        const classwork = await Classwork.find({ classId });
+        const classWorkId = req.params;
+        const classWork = await ClassWork.findById(classWorkId);
+
         res.status(200).json({
-            message: "Classwork fetched",
+            message: "Classwork Details fetched",
             classWork: classWork
         });
-    }
-    catch (err) {
-        console.log(err);
-        if (!err.statusCode) {
-            err.statusCode = 500;
-        }
-        next(err);
-    }
-};
 
-exports.submitClasswork = async (req, res, next) => {
-    try {
-        const { classworkId, userId, submission } = req.body;
-        const classwork = await Classwork.findById(classworkId);
-        classwork.submissions.push({
-            userId,
-            submission
-        });
-        const result = await classwork.save();
-        res.status(200).json({
-            message: "Classwork submitted",
-            classworkId: result._id,
-        });
-    }
-    catch (err) {
-        console.log(err);
-        if (!err.statusCode) {
-            err.statusCode = 500;
-        }
-        next(err);
-    }
-}
-exports.getSubmissions = async (req, res, next) => {
-    try {
-        const classworkId = req.body.classworkId;
-        const classwork = await Classwork.findById(classworkId);
-        res.status(200).json({
-            message: "Submissions fetched",
-            submissions: classwork.submissions
-        });
-    }
-    catch (err) {
-        console.log(err);
-        if (!err.statusCode) {
-            err.statusCode = 500;
-        }
-        next(err);
-    }
-}
-exports.getSubmissionsByUser = async (req, res, next) => {
-    try {
-        const { classworkId, userId } = req.body;
-        const classwork = await Classwork.findById(classworkId);
-        const submissions = classwork.submissions.filter((submission) => {
-            return submission.userId == userId;
-        });
-        res.status(200).json({
-            message: "Submissions fetched",
-            submissions
-        });
     }
     catch (err) {
         console.log(err);
@@ -209,10 +166,11 @@ exports.getSubmissionsByUser = async (req, res, next) => {
     }
 }
 
-exports.classworkPostComment = async (req, res) => {
+exports.classworkPostComment = async (req, res, next) => {
     try {
-        const { classworkId, userId, description } = req.body;
-        const classwork = await Classwork.findById(classworkId);
+        const classWorkId = req.params;
+        const { userId, description } = req.body;
+        const classwork = await ClassWork.findById(classWorkId);
 
         const comments = new Comments({
             comment: description,
@@ -238,3 +196,64 @@ exports.classworkPostComment = async (req, res) => {
         next(err);
     }
 }
+
+exports.submitClasswork = async (req, res, next) => {
+    try {
+        const { classworkId, userId, submission } = req.body;
+        const classwork = await ClassWork.findById(classworkId);
+        classwork.submissions.push({
+            userId,
+            submission
+        });
+        const result = await classwork.save();
+        res.status(200).json({
+            message: "Classwork submitted",
+            classworkId: result._id,
+        });
+    }
+    catch (err) {
+        console.log(err);
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    }
+}
+exports.getSubmissions = async (req, res, next) => {
+    try {
+        const classworkId = req.body.classworkId;
+        const classwork = await ClassWork.findById(classworkId);
+        res.status(200).json({
+            message: "Submissions fetched",
+            submissions: classwork.submissions
+        });
+    }
+    catch (err) {
+        console.log(err);
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    }
+}
+exports.getSubmissionsByUser = async (req, res, next) => {
+    try {
+        const { classworkId, userId } = req.body;
+        const classwork = await ClassWork.findById(classworkId);
+        const submissions = classwork.submissions.filter((submission) => {
+            return submission.userId == userId;
+        });
+        res.status(200).json({
+            message: "Submissions fetched",
+            submissions
+        });
+    }
+    catch (err) {
+        console.log(err);
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    }
+}
+
