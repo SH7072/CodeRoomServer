@@ -9,12 +9,13 @@ dotenv.config({
 });
 //Db  connection
 require('./config/dbConnection');
+app.use(express.json({ limit: '50mb' }), express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Importing routes
 const user = require('./routes/userRoutes');
 const classWork = require('./routes/classworkRoutes');
 const class_ = require('./routes/classRoutes');
-const announcement=require('./routes/announcementRoutes');
+const announcement = require('./routes/announcementRoutes');
 
 
 const { uploadToS3, downloadFile } = require('./utils/s3');
@@ -27,7 +28,6 @@ app.use(
         methods: ["GET", "POST", "PUT", "DELETE"],
     })
 );
-app.use(express.json({ limit: '50mb' }), express.urlencoded({ extended: true, limit: '50mb' }));
 
 
 

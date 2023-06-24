@@ -2,6 +2,7 @@ const Announcement = require("../models/Announcement");
 const Class = require("../models/Class");
 const ClassWork = require("../models/ClassWork");
 const Comment = require("../models/Comments");
+const { deleteFile } = require("../utils/s3");
 
 exports.createAnnouncement = async (req, res, next) => {
     try {
@@ -26,7 +27,8 @@ exports.createAnnouncement = async (req, res, next) => {
             attachments: attachments,
         });
 
-        const result = await announcement.save();
+        const result = await (await announcement.save()).populate('announcementBy', "name");
+
 
         console.log(result);
 
@@ -43,7 +45,6 @@ exports.createAnnouncement = async (req, res, next) => {
         }
         next(err);
     }
-
 }
 exports.getAnnouncements = async (req, res, next) => {
 
@@ -69,35 +70,73 @@ exports.getAnnouncements = async (req, res, next) => {
 exports.editAnnouncement = async (req, res, next) => {
     try {
         const { classId, announcementId } = req.params;
-        const { description } = req.body;
+        const { description, assignedTo, oldFiles, files } = req.body;
         const userId = req.userId;
-        const attachments = [];
-        const class_ = await Class.findById(classId);
 
-        if (req.file) {
+        const class_ = await Class.findById(classId);
+        const announcement = await Announcement.findById(announcementId);
+
+        const attachments = [];
+
+        console.log(typeof (oldFiles));
+
+
+        if (oldFiles && typeof (oldFiles) === 'string') {
+            let parsedFile = JSON.parse(oldFiles);
             attachments.push({
-                url: req.file.location,
-                public_id: req.file.key,
-                type: req.file.mimetype
+                url: parsedFile.url,
+                public_id: parsedFile.public_id,
+                type: parsedFile.type,
+                _id: parsedFile._id
             });
         }
-        const announcement = await Announcement.findById(announcementId);
+        else if (oldFiles && typeof (oldFiles) === 'object') {
+            for (let i = 0; i < oldFiles.length; i++) {
+                let parsedFile = JSON.parse(oldFiles[i]);
+                attachments.push({
+                    url: parsedFile.url,
+                    public_id: parsedFile.public_id,
+                    type: parsedFile.type,
+                    _id: parsedFile._id
+                });
+            }
+        }
+
+        console.log(attachments);
+
+        if (req.files && req.files.length > 0) {
+            for (let i = 0; i < req.files.length; i++) {
+                attachments.push({
+                    url: req.files[i].location,
+                    public_id: req.files[i].key,
+                    type: req.files[i].mimetype,
+                });
+            }
+        }
+
         if (!announcement) {
             const error = new Error("Announcement not found");
             error.statusCode = 404;
             throw error;
         }
-        if ((announcement.announcementBy.toString() !== userId.toString()) && (class_.classTeachers.filter(teacher => teacher.teacherId.toString() === userId.toString()).length === 0)) {
+
+        // announcement can be deleted by the person who posted it or teachers 
+        if ((announcement.announcementBy.toString() !== userId.toString()) || (class_.classTeachers.filter(teacher => teacher.teacherId.toString() === userId.toString()).length === 0)) {
             const error = new Error("Not authorized");
             error.statusCode = 403;
             throw error;
         }
-        announcement.announcement = description;
-        announcement.attachments = attachments;
-        const result = await announcement.save();
+
+        const updatedAnnouncement = await Announcement.findByIdAndUpdate(announcementId, {
+            announcement: description,
+            attachments: attachments,
+        }, { new: true }).populate("announcementBy", "name");
+
+        console.log(updatedAnnouncement, "updatedAnnouncement");
+
         res.status(200).json({
             message: "Announcement updated",
-            announcement: result
+            announcement: updatedAnnouncement
         });
     }
     catch (err) {
@@ -127,9 +166,16 @@ exports.deleteAnnouncement = async (req, res, next) => {
             error.statusCode = 403;
             throw error;
         }
-        await Announcement.findByIdAndRemove(announcementId);
+
+        const result = await Announcement.findByIdAndRemove(announcementId);
+
+        result.attachments.forEach(async (attachment) => {
+            const res = await deleteFile(attachment.public_id);
+        });
+
         res.status(200).json({
-            message: "Announcement Deleted Successfully!!"
+            message: "Announcement Deleted Successfully!!",
+            announcement: result
         });
     }
     catch (err) {

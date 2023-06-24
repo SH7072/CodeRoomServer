@@ -30,9 +30,9 @@ exports.isAuth = (req, res, next) => {
 
 exports.isTeacherOrOwner = async (req, res, next) => {
     const userId = req.userId;
-    const classId = req.body.classId;
+    const { classId } = req.body;
     const user = await Class.findOne({ _id: classId, $or: [{ 'classTeachers.teacherId': userId }, { 'classOwner': userId }] })
-    console.log(user);
+    // console.log(user);
     if (!user) {
         const error = new Error("Not Authorized");
         error.statusCode = 401;

@@ -14,6 +14,8 @@ const bucketName = process.env.BUCKET_NAME;
 const s3 = new aws.S3();
 
 const fileFilter = (req, file, cb) => {
+    // console.log(req.body, "req.body in fileFilter");
+    // console.log(file, "file Filter");
     if (file.mimetype === "application/pdf" ||
         file.mimetype === "image/jpeg" ||
         file.mimetype === "image/png" ||
@@ -29,7 +31,8 @@ const fileFilter = (req, file, cb) => {
         file.mimetype === "application/vnd.oasis.opendocument.presentation"
     ) {
         cb(null, true);
-    } else {
+    }
+    else {
         cb(null, false);
     }
 };
@@ -39,7 +42,12 @@ const fileStorage = multers3({
     bucket: bucketName,
     acl: "public-read",
     key: function (req, file, cb) {
-        cb(null, crpyto.randomBytes(10).toString("hex") + "-" + file.originalname);
+        if (file.fieldname && file.fieldname === "files") {
+            cb(null, crpyto.randomBytes(10).toString("hex") + "-" + file.originalname);
+        }
+        else {
+            cb(null, file);
+        }
     },
 });
 
