@@ -190,6 +190,44 @@ exports.archiveClass = async (req, res, next) => {
 }
 
 
+exports.unarchiveClass = async (req, res, next) => {
+    try {
+        const userId = req.userId;
+        const classId = req.params.id;
+        console.log(userId, classId);
+        const user = await User.findById(userId);
+        if (!user) {
+            const error = new Error("No user found");
+            error.statusCode = 404;
+            throw error;
+        }
+
+        const classIndex = user.classesAsTeacher.findIndex(c => c.classId.toString() === classId.toString());
+        if (classIndex < 0) {
+            const error = new Error("No class found");
+            error.statusCode = 404;
+            throw error;
+        }
+
+        user.classesAsTeacher[classIndex].isArchived = false;
+
+        await user.save();
+
+        res.status(200).json({
+            message: "Class UnArchived",
+            user: user
+        });
+    }
+    catch (err) {
+        console.log(err);
+        if (!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    }
+}
+
+
 exports.getPeople = async (req, res, next) => {
     try {
         const userId = req.userId;

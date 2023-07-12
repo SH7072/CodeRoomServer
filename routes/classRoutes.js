@@ -10,4 +10,5 @@ router.get('/getAllClassRooms', isAuth, getAllClassRooms);
 router.post('/editClass/:id', isAuth, editClass);
 router.post('/unenrollFromClass/:id', isAuth, unenrollFromClass);
 
+
 module.exports = router;
