@@ -3,6 +3,12 @@ const express = require('express');
 const app = express();
 const cors = require("cors");
 const multer = require('multer');
+const httpServer = require("http").createServer(app);
+const { EditorSockets } = require('./controllers/sockets');
+
+
+
+
 
 dotenv.config({
     path: "./config/config.env",
@@ -19,6 +25,7 @@ const announcement = require('./routes/announcementRoutes');
 
 
 const { uploadToS3, downloadFile } = require('./utils/s3');
+const { onConnection } = require('./controllers/sockets2');
 
 // setting cors 
 app.use(
@@ -64,6 +71,16 @@ app.get("/", (req, res) =>
     )
 );
 
-app.listen(process.env.PORT, () => {
+
+httpServer.listen(process.env.PORT, () => {
     console.log(`Server runs on port ${process.env.PORT}`);
 });
+
+const io = exports.io = require("socket.io")(httpServer, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST", "PUT", "DELETE"],
+    },
+});
+
+EditorSockets(io);
