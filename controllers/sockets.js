@@ -83,6 +83,15 @@ exports.EditorSockets = (io) => {
             }
         });
 
+        socket.on('code-selection', ({ roomId, userId, isSocket, selection }) => {
+            try {
+                socket.to(roomId).emit("code-selection-transfer", { isSocket, userId, selection });
+            }
+            catch (err) {
+                console.log(err);
+            }
+        });
+
 
 
         socket.on('leave-room', ({ roomId, userId }) => {
